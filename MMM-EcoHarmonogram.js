@@ -12,7 +12,17 @@ Module.register("MMM-EcoHarmonogram", {
 		app: null, // "customApp" dla gmin z własną aplikacją (np. "gdansk")
 		language: "pl", // język nazw z API i dat: pl | en | uk | ru
 
-		// --- wygląd ---
+		// --- co pokazywać ---
+		showList: true, // lista najbliższych wywozów na lustrze
+		showAlert: true, // alert dzień przed wywozem (wymaga modułu "alert" w config.js)
+
+		// --- alert ---
+		alertType: "alert", // "alert" (okno na środku ekranu) lub "notification" (dymek w rogu)
+		alertFromHour: 16, // od której godziny dnia przed wywozem pokazywać alert (0-23)
+		alertRepeatInterval: 60 * 60 * 1000, // co ile ponawiać alert tego dnia; 0 = tylko raz
+		alertTimer: 30 * 1000, // jak długo alert jest widoczny (ms)
+
+		// --- wygląd listy ---
 		maxDays: 1, // ile najbliższych dni z wywozem pokazać (1 = tylko najbliższy wywóz)
 		daysAhead: 45, // jak daleko w przód szukać
 		exclude: ["TERMIN PŁATNOŚCI"], // nazwy pozycji do pominięcia (bez rozróżniania wielkości liter)
@@ -67,6 +77,12 @@ Module.register("MMM-EcoHarmonogram", {
 		this.sendSocketNotification("ECOHARMONOGRAM_CONFIG", { identifier: this.identifier, config: this.config });
 		// odświeżanie widoku o północy (Dziś/Jutro)
 		this.scheduleMidnightRefresh();
+		this.lastAlertAt = null;
+		this.alertCheckInterval = setInterval(() => this.checkAlert(), 60 * 1000);
+	},
+
+	getHeader () {
+		return this.config.showList ? this.data.header : "";
 	},
 
 	scheduleMidnightRefresh () {
@@ -82,21 +98,52 @@ Module.register("MMM-EcoHarmonogram", {
 		if (notification === "ECOHARMONOGRAM_DATA") {
 			this.collections = payload.collections;
 			this.error = null;
+			this.checkAlert();
 		} else if (notification === "ECOHARMONOGRAM_ERROR") {
 			this.error = payload.error;
 		}
-		this.updateDom(this.config.animationSpeed);
+		if (this.config.showList) this.updateDom(this.config.animationSpeed);
 	},
 
-	upcomingDays () {
+	/** Wywozy od dziś do `daysAhead`, bez pozycji z `exclude`. */
+	visibleCollections () {
 		const today = moment().startOf("day");
 		const limit = moment(today).add(this.config.daysAhead, "days");
 		const exclude = this.config.exclude.map((e) => e.toLowerCase());
-		const byDate = new Map();
-		for (const c of this.collections || []) {
+		return (this.collections || []).filter((c) => {
 			const date = moment(c.date, "YYYY-MM-DD");
-			if (date.isBefore(today) || date.isAfter(limit)) continue;
-			if (exclude.includes(c.name.toLowerCase())) continue;
+			return !date.isBefore(today) && !date.isAfter(limit) && !exclude.includes(c.name.toLowerCase());
+		});
+	},
+
+	/** Pokazuje alert (moduł "alert" MagicMirror), gdy jutro jest wywóz. */
+	checkAlert () {
+		if (!this.config.showAlert || !this.collections) return;
+		const now = moment();
+		if (now.hour() < this.config.alertFromHour) return;
+
+		const tomorrow = moment(now).add(1, "day").format("YYYY-MM-DD");
+		const items = this.visibleCollections().filter((c) => c.date === tomorrow);
+		if (!items.length) return;
+
+		if (this.lastAlertAt) {
+			const sameDay = moment(this.lastAlertAt).isSame(now, "day");
+			const interval = Number(this.config.alertRepeatInterval) || 0;
+			if (sameDay && (interval <= 0 || now.diff(this.lastAlertAt) < interval)) return;
+		}
+		this.lastAlertAt = now.valueOf();
+		this.sendNotification("SHOW_ALERT", {
+			type: this.config.alertType,
+			title: this.translate("ALERT_TITLE"),
+			message: items.map((c) => this.prettyName(c.name)).join(", "),
+			imageFA: "recycle",
+			timer: this.config.alertTimer
+		});
+	},
+
+	upcomingDays () {
+		const byDate = new Map();
+		for (const c of this.visibleCollections()) {
 			if (!byDate.has(c.date)) byDate.set(c.date, []);
 			byDate.get(c.date).push(c);
 		}
@@ -115,6 +162,7 @@ Module.register("MMM-EcoHarmonogram", {
 	getDom () {
 		const wrapper = document.createElement("div");
 		wrapper.className = "mmm-ecoharmonogram small";
+		if (!this.config.showList) return wrapper;
 
 		if (this.error && !this.collections) {
 			wrapper.textContent = `${this.translate("ERROR")}: ${this.error}`;

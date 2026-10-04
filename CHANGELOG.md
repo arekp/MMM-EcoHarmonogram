@@ -2,6 +2,13 @@
 
 Format zgodny z [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/), wersjonowanie [SemVer](https://semver.org/lang/pl/).
 
+## [1.2.0] - 2026-10-04
+
+### Dodane
+- `showAlert` (domyślnie `true`): dzień przed wywozem moduł pokazuje alert „Jutro wywóz śmieci” z rodzajami odpadów, przez wbudowany moduł MagicMirror `alert`.
+- Opcje alertu: `alertType`, `alertFromHour`, `alertRepeatInterval`, `alertTimer`.
+- `showList` (domyślnie `true`): włącza lub wyłącza listę wywozów na lustrze.
+
 ## [1.1.0] - 2026-10-04
 
 ### Zmienione

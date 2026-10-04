@@ -17,6 +17,7 @@ EcoHarmonogram, the schedule service used by many Polish municipalities. See [En
 
 - Dowolny adres: miejscowość, gmina, ulica, numer domu (także warianty zabudowy, rejony i grupy).
 - Najbliższy dzień z wywozem (albo kilka kolejnych dni, opcja `maxDays`), „Dziś” i „Jutro” wyróżnione.
+- Alert dzień przed wywozem: „Jutro wywóz śmieci” z listą odbieranych odpadów.
 - Ikony dla rodzajów odpadów i kolory z EcoHarmonogramu.
 - Automatyczne przejście na nowy harmonogram (np. na kolejny rok), gdy gmina go opublikuje.
 - Czytelne komunikaty błędów konfiguracji z listą dostępnych wartości.
@@ -97,7 +98,36 @@ Sama nazwa miejscowości (`npm run find -- --town "Pruszków"`) pokaże pasując
 
 Opcje „gdy trzeba” wypełniasz tylko, jeśli moduł (albo `npm run find`) zgłosi, że są potrzebne.
 
-### Opcje wyglądu
+### Lista i alert
+
+| Opcja | Domyślnie | Opis |
+|-|-|-|
+| `showList` | `true` | Pokazuje listę najbliższych wywozów na lustrze. `false` ukrywa listę razem z nagłówkiem |
+| `showAlert` | `true` | Dzień przed wywozem pokazuje alert „Jutro wywóz śmieci” z rodzajami odpadów, np. „Metale i tworzywa sztuczne, Papier, Szkło” |
+| `alertType` | `"alert"` | `"alert"` to okno na środku ekranu, `"notification"` to dymek w rogu |
+| `alertFromHour` | `16` | Od której godziny dnia przed wywozem pokazywać alert (0–23) |
+| `alertRepeatInterval` | `3600000` (1 h) | Co ile milisekund ponawiać alert tego dnia; `0` pokaże go tylko raz |
+| `alertTimer` | `30000` (30 s) | Jak długo alert jest widoczny |
+
+Alert korzysta z wbudowanego modułu MagicMirror `alert` (powiadomienie `SHOW_ALERT`), więc w `config/config.js` musi być włączony moduł `{ module: "alert" }`. W domyślnej konfiguracji MagicMirror już jest. Alert pomija pozycje z `exclude`.
+
+Przykład: tylko alert, bez listy na lustrze:
+
+```js
+{
+	module: "MMM-EcoHarmonogram",
+	config: {
+		town: "Pruszków",
+		district: "Pruszków",
+		street: "Rolnicza",
+		number: "18",
+		showList: false,
+		showAlert: true
+	}
+},
+```
+
+### Opcje wyglądu listy
 
 | Opcja | Domyślnie | Opis |
 |-|-|-|
@@ -175,7 +205,7 @@ MMM-EcoHarmonogram displays the next waste collection days for any address serve
 `npm run find -- --town "<town>" --street "<street>" --number <no>` to validate the address and get a ready
 config snippet, then add it to `config/config.js` as shown above. All options are listed in the tables
 above (`town`, `district`, `street`, `number`, `sides`, `region`, `groups`, `community`, `app`, `language`
-for the address; `maxDays` (number of upcoming collection days to show, default `1`), `daysAhead`, `exclude`, `showIcons`, `icons`, … for the display).
+for the address; `maxDays` (number of upcoming collection days to show, default `1`), `showList` / `showAlert` (toggle the on-screen list and the day-before alert shown via the built-in `alert` module, both default `true`), `daysAhead`, `exclude`, `showIcons`, `icons`, … for the display).
 Translations: Polish, English, Ukrainian.
 
 ## Licencja
