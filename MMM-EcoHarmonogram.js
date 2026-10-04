@@ -13,7 +13,7 @@ Module.register("MMM-EcoHarmonogram", {
 		language: "pl", // język nazw z API i dat: pl | en | uk | ru
 
 		// --- wygląd ---
-		maxDays: 5, // ile najbliższych dni z wywozem pokazać
+		maxDays: 1, // ile najbliższych dni z wywozem pokazać (1 = tylko najbliższy wywóz)
 		daysAhead: 45, // jak daleko w przód szukać
 		exclude: ["TERMIN PŁATNOŚCI"], // nazwy pozycji do pominięcia (bez rozróżniania wielkości liter)
 		dateFormat: "dd D MMM", // format moment.js dla dalszych dat
@@ -100,7 +100,8 @@ Module.register("MMM-EcoHarmonogram", {
 			if (!byDate.has(c.date)) byDate.set(c.date, []);
 			byDate.get(c.date).push(c);
 		}
-		return [...byDate.entries()].slice(0, this.config.maxDays);
+		const maxDays = Math.max(1, Math.floor(Number(this.config.maxDays)) || 1);
+		return [...byDate.entries()].slice(0, maxDays);
 	},
 
 	formatDay (dateStr) {

@@ -40,22 +40,34 @@ describe("MMM-EcoHarmonogram getDom", () => {
 	});
 
 	test("grupuje wywozy po dniach i pokazuje Jutro", () => {
-		const r = rows(createModule().getDom());
+		const r = rows(createModule({ maxDays: 5 }).getDom());
 		assert.deepStrictEqual(r[0], { day: "Jutro", types: ["Metale i tworzywa sztuczne", "Papier", "Szkło"] });
 		assert.strictEqual(r[1].day, "Cz 8 paź");
 		assert.deepStrictEqual(r[1].types, ["Bio", "Odpady zmieszane"]);
 		assert.strictEqual(r.length, 5);
 	});
 
+	test("domyślnie pokazuje tylko najbliższy dzień z wywozem", () => {
+		const r = rows(createModule().getDom());
+		assert.strictEqual(r.length, 1);
+		assert.deepStrictEqual(r[0], { day: "Jutro", types: ["Metale i tworzywa sztuczne", "Papier", "Szkło"] });
+	});
+
+	test("maxDays ustawia liczbę dni, nieprawidłowa wartość działa jak 1", () => {
+		assert.strictEqual(rows(createModule({ maxDays: 3 }).getDom()).length, 3);
+		assert.strictEqual(rows(createModule({ maxDays: 0 }).getDom()).length, 1);
+		assert.strictEqual(rows(createModule({ maxDays: "abc" }).getDom()).length, 1);
+	});
+
 	test("domyślnie pomija termin płatności", () => {
-		const all = rows(createModule().getDom()).flatMap((r) => r.types);
+		const all = rows(createModule({ maxDays: 10 }).getDom()).flatMap((r) => r.types);
 		assert.ok(!all.some((t) => /płatności/i.test(t)));
 		const withPayment = rows(createModule({ exclude: [], maxDays: 10 }).getDom()).flatMap((r) => r.types);
 		assert.ok(withPayment.includes("Termin płatności"));
 	});
 
 	test("dobiera ikony i rozjaśnia zbyt ciemne kolory", () => {
-		const dom = createModule().getDom();
+		const dom = createModule({ maxDays: 2 }).getDom();
 		const icons = [...dom.querySelectorAll("tr")[1].querySelectorAll("i")];
 		assert.ok(icons[0].className.includes("fa-leaf"));
 		assert.ok(icons[1].className.includes("fa-trash-can"));

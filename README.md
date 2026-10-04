@@ -74,7 +74,8 @@ Sama nazwa miejscowości (`npm run find -- --town "Pruszków"`) pokaże pasując
 		town: "Pruszków",
 		district: "Pruszków",
 		street: "Rolnicza",
-		number: "18"
+		number: "18",
+		maxDays: 3 // opcjonalnie: ile najbliższych dni z wywozem pokazać (domyślnie 1)
 	}
 },
 ```
@@ -100,7 +101,7 @@ Opcje „gdy trzeba” wypełniasz tylko, jeśli moduł (albo `npm run find`) zg
 
 | Opcja | Domyślnie | Opis |
 |-|-|-|
-| `maxDays` | `5` | Ile najbliższych dni z wywozem pokazać |
+| `maxDays` | `1` | Ile najbliższych dni z wywozem pokazać. Domyślnie tylko najbliższy dzień (ze wszystkimi odbieranymi wtedy odpadami); np. `5` pokaże pięć kolejnych terminów |
 | `daysAhead` | `45` | Jak daleko w przód szukać wywozów |
 | `exclude` | `["TERMIN PŁATNOŚCI"]` | Pozycje harmonogramu do pominięcia (wielkość liter bez znaczenia) |
 | `dateFormat` | `"dd D MMM"` | Format dat dalszych niż jutro ([moment.js](https://momentjs.com/docs/#/displaying/format/)) |

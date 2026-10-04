@@ -2,6 +2,12 @@
 
 Format zgodny z [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/), wersjonowanie [SemVer](https://semver.org/lang/pl/).
 
+## [1.1.0] - 2026-10-04
+
+### Zmienione
+- `maxDays` domyślnie wynosi `1`: moduł pokazuje tylko najbliższy dzień z wywozem. Aby wrócić do poprzedniego widoku, ustaw `maxDays: 5`.
+- Nieprawidłowa wartość `maxDays` (np. `0` lub tekst) jest traktowana jak `1`.
+
 ## [1.0.0] - 2026-10-04
 
 ### Dodane
