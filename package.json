@@ -10,12 +10,12 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/arekp/mmm-ecoharmonogram.git"
+		"url": "git+https://github.com/arekp/MMM-EcoHarmonogram.git"
 	},
 	"bugs": {
-		"url": "https://github.com/arekp/mmm-ecoharmonogram/issues"
+		"url": "https://github.com/arekp/MMM-EcoHarmonogram/issues"
 	},
-	"homepage": "https://github.com/arekp/mmm-ecoharmonogram#readme",
+	"homepage": "https://github.com/arekp/MMM-EcoHarmonogram#readme",
 	"keywords": [
 		"MagicMirror",
 		"MagicMirror²",

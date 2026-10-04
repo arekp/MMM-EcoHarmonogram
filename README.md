@@ -1,6 +1,6 @@
 # MMM-EcoHarmonogram
 
-[![CI](https://github.com/arekp/mmm-ecoharmonogram/actions/workflows/ci.yml/badge.svg)](https://github.com/arekp/mmm-ecoharmonogram/actions/workflows/ci.yml)
+[![CI](https://github.com/arekp/MMM-EcoHarmonogram/actions/workflows/ci.yml/badge.svg)](https://github.com/arekp/MMM-EcoHarmonogram/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 Moduł [MagicMirror²](https://magicmirror.builders) pokazujący najbliższe terminy wywozu odpadów
@@ -24,10 +24,8 @@ EcoHarmonogram, the schedule service used by many Polish municipalities. See [En
 
 ```bash
 cd ~/MagicMirror/modules
-git clone https://github.com/arekp/mmm-ecoharmonogram.git MMM-EcoHarmonogram
+git clone https://github.com/arekp/MMM-EcoHarmonogram.git
 ```
-
-Katalog musi się nazywać `MMM-EcoHarmonogram` (tak jak moduł), dlatego nazwa jest podana w poleceniu `git clone`.
 
 Wymagany Node.js 20 lub nowszy. Moduł nie ma zależności, więc `npm install` nie jest potrzebny.
 
@@ -139,7 +137,7 @@ z którego korzysta aplikacja mobilna EcoHarmonogram. Kolejność wywołań to
 (grupy, warianty, rejony, zakresy numerów) jest wzorowane na źródle `ecoharmonogram_pl` z projektu
 [hacs_waste_collection_schedule](https://github.com/mampfes/hacs_waste_collection_schedule) dla Home Assistanta.
 
-API może się zmienić bez zapowiedzi. Jeśli moduł przestanie działać, zgłoś to w [Issues](https://github.com/arekp/mmm-ecoharmonogram/issues).
+API może się zmienić bez zapowiedzi. Jeśli moduł przestanie działać, zgłoś to w [Issues](https://github.com/arekp/MMM-EcoHarmonogram/issues).
 
 ## Rozwiązywanie problemów
 
