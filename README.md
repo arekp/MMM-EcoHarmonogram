@@ -9,12 +9,14 @@ z [EcoHarmonogramu](https://ecoharmonogram.pl), dla dowolnego adresu z gmin, kt�
 *English: a MagicMirror² module that shows upcoming waste collection dates for any address covered by
 EcoHarmonogram, the schedule service used by many Polish municipalities. See [English summary](#english-summary).*
 
-![Podgląd modułu](docs/preview.png)
+| Domyślnie (`maxDays: 1`) | `maxDays: 5` |
+|-|-|
+| ![Podgląd: najbliższy dzień](docs/preview.png) | ![Podgląd: 5 najbliższych dni](docs/preview-5-days.png) |
 
 ## Funkcje
 
 - Dowolny adres: miejscowość, gmina, ulica, numer domu (także warianty zabudowy, rejony i grupy).
-- Wywozy pogrupowane po dniach, „Dziś” i „Jutro” wyróżnione.
+- Najbliższy dzień z wywozem (albo kilka kolejnych dni, opcja `maxDays`), „Dziś” i „Jutro” wyróżnione.
 - Ikony dla rodzajów odpadów i kolory z EcoHarmonogramu.
 - Automatyczne przejście na nowy harmonogram (np. na kolejny rok), gdy gmina go opublikuje.
 - Czytelne komunikaty błędów konfiguracji z listą dostępnych wartości.
@@ -173,7 +175,7 @@ MMM-EcoHarmonogram displays the next waste collection days for any address serve
 `npm run find -- --town "<town>" --street "<street>" --number <no>` to validate the address and get a ready
 config snippet, then add it to `config/config.js` as shown above. All options are listed in the tables
 above (`town`, `district`, `street`, `number`, `sides`, `region`, `groups`, `community`, `app`, `language`
-for the address; `maxDays`, `daysAhead`, `exclude`, `showIcons`, `icons`, … for the display).
+for the address; `maxDays` (number of upcoming collection days to show, default `1`), `daysAhead`, `exclude`, `showIcons`, `icons`, … for the display).
 Translations: Polish, English, Ukrainian.
 
 ## Licencja

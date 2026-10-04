@@ -7,6 +7,7 @@ Format zgodny z [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/), wersjo
 ### Zmienione
 - `maxDays` domyślnie wynosi `1`: moduł pokazuje tylko najbliższy dzień z wywozem. Aby wrócić do poprzedniego widoku, ustaw `maxDays: 5`.
 - Nieprawidłowa wartość `maxDays` (np. `0` lub tekst) jest traktowana jak `1`.
+- README: opis `maxDays` w tabeli opcji i przykładzie konfiguracji, podglądy dla 1 i 5 dni.
 
 ## [1.0.0] - 2026-10-04
 
