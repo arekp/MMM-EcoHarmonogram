@@ -1,0 +1,39 @@
+.mmm-ecoharmonogram table {
+	border-collapse: collapse;
+}
+
+.mmm-ecoharmonogram td {
+	padding: 2px 0;
+	vertical-align: top;
+}
+
+.mmm-ecoharmonogram td.day {
+	padding-right: 14px;
+	white-space: nowrap;
+	text-align: right;
+}
+
+.mmm-ecoharmonogram .type {
+	display: block;
+	text-align: left;
+}
+
+.mmm-ecoharmonogram .dot {
+	display: inline-block;
+	width: 0.6em;
+	height: 0.6em;
+	border-radius: 50%;
+	margin-right: 0.45em;
+	vertical-align: middle;
+	box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+.mmm-ecoharmonogram tr.soon td.day {
+	color: #fff;
+	font-weight: 600;
+}
+
+.mmm-ecoharmonogram .icon {
+	margin-right: 0.45em;
+	font-size: 0.85em;
+}

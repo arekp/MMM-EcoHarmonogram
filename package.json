@@ -1,0 +1,42 @@
+{
+	"name": "mmm-ecoharmonogram",
+	"version": "1.0.0",
+	"description": "MagicMirror² module showing upcoming waste collection dates from EcoHarmonogram (ecoharmonogram.pl) for any supported Polish address.",
+	"main": "MMM-EcoHarmonogram.js",
+	"scripts": {
+		"test": "node --test test/*.test.js",
+		"lint": "eslint .",
+		"find": "node scripts/find-address.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/arekp/mmm-ecoharmonogram.git"
+	},
+	"bugs": {
+		"url": "https://github.com/arekp/mmm-ecoharmonogram/issues"
+	},
+	"homepage": "https://github.com/arekp/mmm-ecoharmonogram#readme",
+	"keywords": [
+		"MagicMirror",
+		"MagicMirror²",
+		"module",
+		"ecoharmonogram",
+		"waste collection",
+		"odpady",
+		"wywóz śmieci",
+		"harmonogram"
+	],
+	"author": "Arek (https://github.com/arekp)",
+	"license": "MIT",
+	"engines": {
+		"node": ">=20"
+	},
+	"devDependencies": {
+		"@eslint/js": "^10.0.1",
+		"@stylistic/eslint-plugin": "^5.10.0",
+		"eslint": "^10.12.0",
+		"globals": "^17.13.0",
+		"jsdom": "^29.1.1",
+		"moment": "^2.31.0"
+	}
+}
