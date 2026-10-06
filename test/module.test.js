@@ -129,16 +129,49 @@ describe("alert dzień przed wywozem", () => {
 			type: "alert",
 			title: "Jutro wywóz śmieci",
 			message: "Metale i tworzywa sztuczne, Papier, Szkło",
-			imageFA: "recycle",
-			timer: 30000
+			imageFA: "recycle"
 		});
 	});
 
-	test("domyślnie pokazuje alert od 12:00 dnia przed wywozem", () => {
-		at("2026-10-06T15:29:00");
+	test("domyślnie alert wisi od 16:00 dnia przed wywozem do 7:00 w dniu wywozu", () => {
+		at("2026-10-06T16:00:00");
 		const m = createModule();
 		m.checkAlert();
-		assert.strictEqual(m.sent.length, 1);
+		at("2026-10-06T23:59:00");
+		m.checkAlert();
+		assert.strictEqual(m.sent.length, 1, "bez ponawiania, alert wciąż wisi");
+		assert.ok(!("timer" in m.sent[0].payload), "bez timera, więc nie znika po 30 s");
+
+		at("2026-10-07T00:00:30"); // po północy: ten sam wywóz, tytuł „Dziś”
+		m.checkAlert();
+		assert.strictEqual(m.sent.length, 2);
+		assert.deepStrictEqual(m.sent[1].payload, {
+			type: "alert",
+			title: "Dziś wywóz śmieci",
+			message: "Metale i tworzywa sztuczne, Papier, Szkło",
+			imageFA: "recycle"
+		});
+		at("2026-10-07T06:59:00");
+		m.checkAlert();
+		assert.strictEqual(m.sent.length, 2);
+
+		at("2026-10-07T07:00:00");
+		m.checkAlert();
+		assert.deepStrictEqual(m.sent.map((s) => s.notification), ["SHOW_ALERT", "SHOW_ALERT", "HIDE_ALERT"]);
+		m.checkAlert();
+		assert.strictEqual(m.sent.length, 3, "HIDE_ALERT tylko raz");
+	});
+
+	test("po restarcie lustra rano w dniu wywozu alert pokazuje się do 7:00", () => {
+		at("2026-10-07T06:30:00");
+		const m = createModule();
+		m.checkAlert();
+		assert.strictEqual(m.sent[0].payload.title, "Dziś wywóz śmieci");
+
+		at("2026-10-07T07:30:00");
+		const late = createModule();
+		late.checkAlert();
+		assert.strictEqual(late.sent.length, 0);
 	});
 
 	test("nie wysyła alertu przed DOM_OBJECTS_CREATED i nie blokuje go na godzinę", () => {
@@ -153,7 +186,7 @@ describe("alert dzień przed wywozem", () => {
 	});
 
 	test("nie pokazuje alertu przed alertFromHour ani gdy jutro nie ma wywozu", () => {
-		at("2026-10-06T11:59:00");
+		at("2026-10-06T15:59:00");
 		const early = createModule();
 		early.checkAlert();
 		assert.strictEqual(early.sent.length, 0);
@@ -166,8 +199,9 @@ describe("alert dzień przed wywozem", () => {
 
 	test("ponawia alert co alertRepeatInterval, a przy 0 tylko raz", () => {
 		at("2026-10-06T17:00:00");
-		const m = createModule();
+		const m = createModule({ alertTimer: 30000 });
 		m.checkAlert();
+		assert.strictEqual(m.sent[0].payload.timer, 30000);
 		at("2026-10-06T17:30:00");
 		m.checkAlert();
 		assert.strictEqual(m.sent.length, 1, "nie częściej niż co godzinę");
@@ -176,7 +210,7 @@ describe("alert dzień przed wywozem", () => {
 		assert.strictEqual(m.sent.length, 2);
 
 		at("2026-10-06T17:00:00");
-		const once = createModule({ alertRepeatInterval: 0 });
+		const once = createModule({ alertTimer: 30000, alertRepeatInterval: 0 });
 		once.checkAlert();
 		at("2026-10-06T21:00:00");
 		once.checkAlert();
@@ -192,6 +226,7 @@ describe("alert dzień przed wywozem", () => {
 		const note = createModule({ alertType: "notification" });
 		note.checkAlert();
 		assert.strictEqual(note.sent[0].payload.type, "notification");
+		assert.strictEqual(note.sent[0].payload.timer, 30000, "dymek zawsze znika sam, więc dostaje timer");
 	});
 
 	test("alert pomija pozycje z exclude (termin płatności 15.10)", () => {

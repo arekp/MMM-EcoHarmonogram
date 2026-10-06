@@ -18,9 +18,10 @@ Module.register("MMM-EcoHarmonogram", {
 
 		// --- alert ---
 		alertType: "alert", // "alert" (okno na środku ekranu) lub "notification" (dymek w rogu)
-		alertFromHour: 12, // od której godziny dnia przed wywozem pokazywać alert (0-23)
-		alertRepeatInterval: 60 * 60 * 1000, // co ile ponawiać alert tego dnia; 0 = tylko raz
-		alertTimer: 30 * 1000, // jak długo alert jest widoczny (ms)
+		alertFromHour: 16, // od której godziny dnia przed wywozem pokazywać alert (0-23)
+		alertUntilHour: 7, // do której godziny w dniu wywozu pokazywać alert (0 = tylko do północy)
+		alertTimer: 0, // jak długo alert jest widoczny (ms); 0 = cały czas do alertUntilHour (tylko alertType "alert")
+		alertRepeatInterval: 60 * 60 * 1000, // przy alertTimer > 0: co ile ponawiać alert tego dnia; 0 = tylko raz
 
 		// --- wygląd listy ---
 		maxDays: 1, // ile najbliższych dni z wywozem pokazać (1 = tylko najbliższy wywóz)
@@ -78,6 +79,7 @@ Module.register("MMM-EcoHarmonogram", {
 		// odświeżanie widoku o północy (Dziś/Jutro)
 		this.scheduleMidnightRefresh();
 		this.lastAlertAt = null;
+		this.shownAlert = null;
 		this.domReady = false;
 		this.alertCheckInterval = setInterval(() => this.checkAlert(), 60 * 1000);
 	},
@@ -90,6 +92,7 @@ Module.register("MMM-EcoHarmonogram", {
 		const msToMidnight = moment().endOf("day").diff(moment()) + 1000;
 		setTimeout(() => {
 			this.updateDom(this.config.animationSpeed);
+			this.checkAlert();
 			this.scheduleMidnightRefresh();
 		}, msToMidnight);
 	},
@@ -125,29 +128,58 @@ Module.register("MMM-EcoHarmonogram", {
 		});
 	},
 
-	/** Pokazuje alert (moduł "alert" MagicMirror), gdy jutro jest wywóz. */
+	/** Alert bez timera wisi do alertUntilHour; "notification" zawsze znika sam, więc dostaje timer. */
+	isPersistentAlert () {
+		return this.config.alertType !== "notification" && !(Number(this.config.alertTimer) > 0);
+	},
+
+	/**
+	 * Dzień wywozu, o którym teraz przypominamy: jutro od `alertFromHour`,
+	 * dziś do `alertUntilHour`, poza tymi godzinami null.
+	 */
+	alertTarget (now) {
+		if (now.hour() >= this.config.alertFromHour) return { date: moment(now).add(1, "day").format("YYYY-MM-DD"), title: "ALERT_TITLE" };
+		if (now.hour() < this.config.alertUntilHour) return { date: now.format("YYYY-MM-DD"), title: "ALERT_TITLE_TODAY" };
+		return null;
+	},
+
+	/** Pokazuje alert (moduł "alert" MagicMirror) od wieczora przed wywozem do rana w dniu wywozu. */
 	checkAlert () {
 		if (!this.config.showAlert || !this.collections || !this.domReady) return;
 		const now = moment();
-		if (now.hour() < this.config.alertFromHour) return;
+		const target = this.alertTarget(now);
+		const items = target ? this.visibleCollections().filter((c) => c.date === target.date) : [];
 
-		const tomorrow = moment(now).add(1, "day").format("YYYY-MM-DD");
-		const items = this.visibleCollections().filter((c) => c.date === tomorrow);
-		if (!items.length) return;
+		if (!items.length) {
+			this.hideAlert();
+			return;
+		}
+		const title = this.translate(target.title);
+		const message = items.map((c) => this.prettyName(c.name)).join(", ");
 
-		if (this.lastAlertAt) {
+		if (this.isPersistentAlert()) {
+			// ten sam alert już wisi na ekranie
+			if (this.shownAlert && this.shownAlert.title === title && this.shownAlert.message === message) return;
+		} else if (this.lastAlertAt) {
 			const sameDay = moment(this.lastAlertAt).isSame(now, "day");
 			const interval = Number(this.config.alertRepeatInterval) || 0;
 			if (sameDay && (interval <= 0 || now.diff(this.lastAlertAt) < interval)) return;
 		}
 		this.lastAlertAt = now.valueOf();
-		this.sendNotification("SHOW_ALERT", {
-			type: this.config.alertType,
-			title: this.translate("ALERT_TITLE"),
-			message: items.map((c) => this.prettyName(c.name)).join(", "),
-			imageFA: "recycle",
-			timer: this.config.alertTimer
-		});
+		const payload = { type: this.config.alertType, title, message, imageFA: "recycle" };
+		if (this.isPersistentAlert()) {
+			this.shownAlert = { title, message };
+		} else {
+			payload.timer = Number(this.config.alertTimer) > 0 ? Number(this.config.alertTimer) : 30 * 1000;
+		}
+		this.sendNotification("SHOW_ALERT", payload);
+	},
+
+	/** Chowa alert pokazany bez timera (np. o alertUntilHour w dniu wywozu). */
+	hideAlert () {
+		if (!this.shownAlert) return;
+		this.shownAlert = null;
+		this.sendNotification("HIDE_ALERT");
 	},
 
 	upcomingDays () {

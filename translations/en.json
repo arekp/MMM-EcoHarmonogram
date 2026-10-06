@@ -4,5 +4,6 @@
 	"LOADING": "Loading schedule…",
 	"NO_COLLECTIONS": "No upcoming collections",
 	"ERROR": "Failed to load schedule",
-	"ALERT_TITLE": "Waste collection tomorrow"
+	"ALERT_TITLE": "Waste collection tomorrow",
+	"ALERT_TITLE_TODAY": "Waste collection today"
 }
