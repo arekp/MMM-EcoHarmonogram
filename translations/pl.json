@@ -4,5 +4,6 @@
 	"LOADING": "Ładowanie harmonogramu…",
 	"NO_COLLECTIONS": "Brak zaplanowanych wywozów",
 	"ERROR": "Błąd pobierania harmonogramu",
-	"ALERT_TITLE": "Jutro wywóz śmieci"
+	"ALERT_TITLE": "Jutro wywóz śmieci",
+	"ALERT_TITLE_TODAY": "Dziś wywóz śmieci"
 }

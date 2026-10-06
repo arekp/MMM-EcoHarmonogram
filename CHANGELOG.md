@@ -5,7 +5,11 @@ Format zgodny z [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/), wersjo
 ## [1.2.2] - 2026-10-06
 
 ### Zmienione
-- Alert o jutrzejszym wywozie domyślnie zostaje na ekranie do północy (`alertTimer: 0`), zamiast pojawiać się na 30 s raz na godzinę, co łatwo było przegapić. O północy moduł sam go chowa (`HIDE_ALERT`). Poprzednie zachowanie: `alertTimer: 30000`.
+- Alert o wywozie domyślnie stale wisi na ekranie (`alertTimer: 0`) od 16:00 dnia przed wywozem do 7:00 w dniu wywozu, zamiast pojawiać się na 30 s raz na godzinę, co łatwo było przegapić. Potem moduł sam go chowa (`HIDE_ALERT`). Poprzednie zachowanie: `alertTimer: 30000`.
+- `alertFromHour` znów domyślnie wynosi `16`.
+
+### Dodane
+- `alertUntilHour` (domyślnie `7`): do której godziny w dniu wywozu pokazywać alert. Po północy alert ma tytuł „Dziś wywóz śmieci”.
 
 ## [1.2.1] - 2026-10-06
 

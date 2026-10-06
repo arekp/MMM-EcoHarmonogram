@@ -133,8 +133,8 @@ describe("alert dzień przed wywozem", () => {
 		});
 	});
 
-	test("domyślnie alert zostaje na ekranie do północy i nie jest wysyłany ponownie", () => {
-		at("2026-10-06T17:00:00");
+	test("domyślnie alert wisi od 16:00 dnia przed wywozem do 7:00 w dniu wywozu", () => {
+		at("2026-10-06T16:00:00");
 		const m = createModule();
 		m.checkAlert();
 		at("2026-10-06T23:59:00");
@@ -142,18 +142,36 @@ describe("alert dzień przed wywozem", () => {
 		assert.strictEqual(m.sent.length, 1, "bez ponawiania, alert wciąż wisi");
 		assert.ok(!("timer" in m.sent[0].payload), "bez timera, więc nie znika po 30 s");
 
-		at("2026-10-07T00:00:30"); // dzień wywozu
+		at("2026-10-07T00:00:30"); // po północy: ten sam wywóz, tytuł „Dziś”
 		m.checkAlert();
-		assert.deepStrictEqual(m.sent.map((s) => s.notification), ["SHOW_ALERT", "HIDE_ALERT"]);
+		assert.strictEqual(m.sent.length, 2);
+		assert.deepStrictEqual(m.sent[1].payload, {
+			type: "alert",
+			title: "Dziś wywóz śmieci",
+			message: "Metale i tworzywa sztuczne, Papier, Szkło",
+			imageFA: "recycle"
+		});
+		at("2026-10-07T06:59:00");
 		m.checkAlert();
-		assert.strictEqual(m.sent.length, 2, "HIDE_ALERT tylko raz");
+		assert.strictEqual(m.sent.length, 2);
+
+		at("2026-10-07T07:00:00");
+		m.checkAlert();
+		assert.deepStrictEqual(m.sent.map((s) => s.notification), ["SHOW_ALERT", "SHOW_ALERT", "HIDE_ALERT"]);
+		m.checkAlert();
+		assert.strictEqual(m.sent.length, 3, "HIDE_ALERT tylko raz");
 	});
 
-	test("domyślnie pokazuje alert od 12:00 dnia przed wywozem", () => {
-		at("2026-10-06T15:29:00");
+	test("po restarcie lustra rano w dniu wywozu alert pokazuje się do 7:00", () => {
+		at("2026-10-07T06:30:00");
 		const m = createModule();
 		m.checkAlert();
-		assert.strictEqual(m.sent.length, 1);
+		assert.strictEqual(m.sent[0].payload.title, "Dziś wywóz śmieci");
+
+		at("2026-10-07T07:30:00");
+		const late = createModule();
+		late.checkAlert();
+		assert.strictEqual(late.sent.length, 0);
 	});
 
 	test("nie wysyła alertu przed DOM_OBJECTS_CREATED i nie blokuje go na godzinę", () => {
@@ -168,7 +186,7 @@ describe("alert dzień przed wywozem", () => {
 	});
 
 	test("nie pokazuje alertu przed alertFromHour ani gdy jutro nie ma wywozu", () => {
-		at("2026-10-06T11:59:00");
+		at("2026-10-06T15:59:00");
 		const early = createModule();
 		early.checkAlert();
 		assert.strictEqual(early.sent.length, 0);
