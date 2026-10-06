@@ -105,7 +105,7 @@ Opcje „gdy trzeba” wypełniasz tylko, jeśli moduł (albo `npm run find`) zg
 | `showList` | `true` | Pokazuje listę najbliższych wywozów na lustrze. `false` ukrywa listę razem z nagłówkiem |
 | `showAlert` | `true` | Dzień przed wywozem pokazuje alert „Jutro wywóz śmieci” z rodzajami odpadów, np. „Metale i tworzywa sztuczne, Papier, Szkło” |
 | `alertType` | `"alert"` | `"alert"` to okno na środku ekranu, `"notification"` to dymek w rogu |
-| `alertFromHour` | `16` | Od której godziny dnia przed wywozem pokazywać alert (0–23) |
+| `alertFromHour` | `12` | Od której godziny dnia przed wywozem pokazywać alert (0–23) |
 | `alertRepeatInterval` | `3600000` (1 h) | Co ile milisekund ponawiać alert tego dnia; `0` pokaże go tylko raz |
 | `alertTimer` | `30000` (30 s) | Jak długo alert jest widoczny |
 
