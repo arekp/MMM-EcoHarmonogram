@@ -2,6 +2,12 @@
 
 Format zgodny z [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/), wersjonowanie [SemVer](https://semver.org/lang/pl/).
 
+## [1.2.1] - 2026-10-06
+
+### Poprawione
+- Alert nie przepada już po starcie lustra: moduł wysyła `SHOW_ALERT` dopiero po `DOM_OBJECTS_CREATED`. Wcześniej alert wysłany zaraz po pobraniu danych mógł zniknąć bez śladu, a kolejna próba była dopiero po `alertRepeatInterval` (1 h).
+- `alertFromHour` domyślnie wynosi `12` zamiast `16`, więc alert o jutrzejszym wywozie pojawia się już od południa.
+
 ## [1.2.0] - 2026-10-04
 
 ### Dodane

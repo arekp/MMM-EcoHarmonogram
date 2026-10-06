@@ -1,6 +1,6 @@
 {
 	"name": "mmm-ecoharmonogram",
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"description": "MagicMirror² module showing upcoming waste collection dates from EcoHarmonogram (ecoharmonogram.pl) for any supported Polish address.",
 	"main": "MMM-EcoHarmonogram.js",
 	"scripts": {

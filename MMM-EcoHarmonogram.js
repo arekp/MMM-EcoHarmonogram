@@ -18,7 +18,7 @@ Module.register("MMM-EcoHarmonogram", {
 
 		// --- alert ---
 		alertType: "alert", // "alert" (okno na środku ekranu) lub "notification" (dymek w rogu)
-		alertFromHour: 16, // od której godziny dnia przed wywozem pokazywać alert (0-23)
+		alertFromHour: 12, // od której godziny dnia przed wywozem pokazywać alert (0-23)
 		alertRepeatInterval: 60 * 60 * 1000, // co ile ponawiać alert tego dnia; 0 = tylko raz
 		alertTimer: 30 * 1000, // jak długo alert jest widoczny (ms)
 
@@ -78,6 +78,7 @@ Module.register("MMM-EcoHarmonogram", {
 		// odświeżanie widoku o północy (Dziś/Jutro)
 		this.scheduleMidnightRefresh();
 		this.lastAlertAt = null;
+		this.domReady = false;
 		this.alertCheckInterval = setInterval(() => this.checkAlert(), 60 * 1000);
 	},
 
@@ -91,6 +92,14 @@ Module.register("MMM-EcoHarmonogram", {
 			this.updateDom(this.config.animationSpeed);
 			this.scheduleMidnightRefresh();
 		}, msToMidnight);
+	},
+
+	notificationReceived (notification) {
+		// SHOW_ALERT wysłany przed utworzeniem modułów przepada, więc czekamy na gotowe lustro
+		if (notification === "DOM_OBJECTS_CREATED") {
+			this.domReady = true;
+			this.checkAlert();
+		}
 	},
 
 	socketNotificationReceived (notification, payload) {
@@ -118,7 +127,7 @@ Module.register("MMM-EcoHarmonogram", {
 
 	/** Pokazuje alert (moduł "alert" MagicMirror), gdy jutro jest wywóz. */
 	checkAlert () {
-		if (!this.config.showAlert || !this.collections) return;
+		if (!this.config.showAlert || !this.collections || !this.domReady) return;
 		const now = moment();
 		if (now.hour() < this.config.alertFromHour) return;
 

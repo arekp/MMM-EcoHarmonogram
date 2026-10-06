@@ -15,6 +15,7 @@ function createModule (config = {}) {
 	instance.identifier = "module_0";
 	instance.data = { header: "Wywóz śmieci" };
 	instance.sent = [];
+	instance.domReady = true;
 	instance.sendNotification = (notification, payload) => instance.sent.push({ notification, payload });
 	instance.collections = parseSchedules(fixtures.getSchedules).sort((a, b) => a.date.localeCompare(b.date) || a.name.localeCompare(b.name, "pl"));
 	return instance;
@@ -133,8 +134,26 @@ describe("alert dzień przed wywozem", () => {
 		});
 	});
 
+	test("domyślnie pokazuje alert od 12:00 dnia przed wywozem", () => {
+		at("2026-10-06T15:29:00");
+		const m = createModule();
+		m.checkAlert();
+		assert.strictEqual(m.sent.length, 1);
+	});
+
+	test("nie wysyła alertu przed DOM_OBJECTS_CREATED i nie blokuje go na godzinę", () => {
+		at("2026-10-06T17:00:00");
+		const m = createModule();
+		m.domReady = false;
+		m.checkAlert(); // dane z node_helpera przyszły, zanim lustro było gotowe
+		assert.strictEqual(m.sent.length, 0);
+		m.notificationReceived("DOM_OBJECTS_CREATED");
+		assert.strictEqual(m.sent.length, 1);
+		assert.strictEqual(m.sent[0].notification, "SHOW_ALERT");
+	});
+
 	test("nie pokazuje alertu przed alertFromHour ani gdy jutro nie ma wywozu", () => {
-		at("2026-10-06T15:59:00");
+		at("2026-10-06T11:59:00");
 		const early = createModule();
 		early.checkAlert();
 		assert.strictEqual(early.sent.length, 0);
