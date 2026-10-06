@@ -106,8 +106,8 @@ Opcje „gdy trzeba” wypełniasz tylko, jeśli moduł (albo `npm run find`) zg
 | `showAlert` | `true` | Dzień przed wywozem pokazuje alert „Jutro wywóz śmieci” z rodzajami odpadów, np. „Metale i tworzywa sztuczne, Papier, Szkło” |
 | `alertType` | `"alert"` | `"alert"` to okno na środku ekranu, `"notification"` to dymek w rogu |
 | `alertFromHour` | `12` | Od której godziny dnia przed wywozem pokazywać alert (0–23) |
-| `alertRepeatInterval` | `3600000` (1 h) | Co ile milisekund ponawiać alert tego dnia; `0` pokaże go tylko raz |
-| `alertTimer` | `30000` (30 s) | Jak długo alert jest widoczny |
+| `alertTimer` | `0` | Jak długo alert jest widoczny (ms). `0` oznacza, że okno zostaje na ekranie do północy. Dla `alertType: "notification"` wartość `0` daje 30 s, bo dymek zawsze znika sam |
+| `alertRepeatInterval` | `3600000` (1 h) | Tylko gdy alert znika sam: co ile milisekund ponawiać go tego dnia; `0` pokaże go tylko raz |
 
 Alert korzysta z wbudowanego modułu MagicMirror `alert` (powiadomienie `SHOW_ALERT`), więc w `config/config.js` musi być włączony moduł `{ module: "alert" }`. W domyślnej konfiguracji MagicMirror już jest. Alert pomija pozycje z `exclude`.
 

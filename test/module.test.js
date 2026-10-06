@@ -129,9 +129,24 @@ describe("alert dzień przed wywozem", () => {
 			type: "alert",
 			title: "Jutro wywóz śmieci",
 			message: "Metale i tworzywa sztuczne, Papier, Szkło",
-			imageFA: "recycle",
-			timer: 30000
+			imageFA: "recycle"
 		});
+	});
+
+	test("domyślnie alert zostaje na ekranie do północy i nie jest wysyłany ponownie", () => {
+		at("2026-10-06T17:00:00");
+		const m = createModule();
+		m.checkAlert();
+		at("2026-10-06T23:59:00");
+		m.checkAlert();
+		assert.strictEqual(m.sent.length, 1, "bez ponawiania, alert wciąż wisi");
+		assert.ok(!("timer" in m.sent[0].payload), "bez timera, więc nie znika po 30 s");
+
+		at("2026-10-07T00:00:30"); // dzień wywozu
+		m.checkAlert();
+		assert.deepStrictEqual(m.sent.map((s) => s.notification), ["SHOW_ALERT", "HIDE_ALERT"]);
+		m.checkAlert();
+		assert.strictEqual(m.sent.length, 2, "HIDE_ALERT tylko raz");
 	});
 
 	test("domyślnie pokazuje alert od 12:00 dnia przed wywozem", () => {
@@ -166,8 +181,9 @@ describe("alert dzień przed wywozem", () => {
 
 	test("ponawia alert co alertRepeatInterval, a przy 0 tylko raz", () => {
 		at("2026-10-06T17:00:00");
-		const m = createModule();
+		const m = createModule({ alertTimer: 30000 });
 		m.checkAlert();
+		assert.strictEqual(m.sent[0].payload.timer, 30000);
 		at("2026-10-06T17:30:00");
 		m.checkAlert();
 		assert.strictEqual(m.sent.length, 1, "nie częściej niż co godzinę");
@@ -176,7 +192,7 @@ describe("alert dzień przed wywozem", () => {
 		assert.strictEqual(m.sent.length, 2);
 
 		at("2026-10-06T17:00:00");
-		const once = createModule({ alertRepeatInterval: 0 });
+		const once = createModule({ alertTimer: 30000, alertRepeatInterval: 0 });
 		once.checkAlert();
 		at("2026-10-06T21:00:00");
 		once.checkAlert();
@@ -192,6 +208,7 @@ describe("alert dzień przed wywozem", () => {
 		const note = createModule({ alertType: "notification" });
 		note.checkAlert();
 		assert.strictEqual(note.sent[0].payload.type, "notification");
+		assert.strictEqual(note.sent[0].payload.timer, 30000, "dymek zawsze znika sam, więc dostaje timer");
 	});
 
 	test("alert pomija pozycje z exclude (termin płatności 15.10)", () => {

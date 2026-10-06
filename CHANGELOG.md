@@ -2,6 +2,11 @@
 
 Format zgodny z [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/), wersjonowanie [SemVer](https://semver.org/lang/pl/).
 
+## [1.2.2] - 2026-10-06
+
+### Zmienione
+- Alert o jutrzejszym wywozie domyślnie zostaje na ekranie do północy (`alertTimer: 0`), zamiast pojawiać się na 30 s raz na godzinę, co łatwo było przegapić. O północy moduł sam go chowa (`HIDE_ALERT`). Poprzednie zachowanie: `alertTimer: 30000`.
+
 ## [1.2.1] - 2026-10-06
 
 ### Poprawione

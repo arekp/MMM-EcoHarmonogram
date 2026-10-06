@@ -19,8 +19,8 @@ Module.register("MMM-EcoHarmonogram", {
 		// --- alert ---
 		alertType: "alert", // "alert" (okno na środku ekranu) lub "notification" (dymek w rogu)
 		alertFromHour: 12, // od której godziny dnia przed wywozem pokazywać alert (0-23)
-		alertRepeatInterval: 60 * 60 * 1000, // co ile ponawiać alert tego dnia; 0 = tylko raz
-		alertTimer: 30 * 1000, // jak długo alert jest widoczny (ms)
+		alertTimer: 0, // jak długo alert jest widoczny (ms); 0 = do północy (tylko alertType "alert")
+		alertRepeatInterval: 60 * 60 * 1000, // przy alertTimer > 0: co ile ponawiać alert tego dnia; 0 = tylko raz
 
 		// --- wygląd listy ---
 		maxDays: 1, // ile najbliższych dni z wywozem pokazać (1 = tylko najbliższy wywóz)
@@ -78,6 +78,7 @@ Module.register("MMM-EcoHarmonogram", {
 		// odświeżanie widoku o północy (Dziś/Jutro)
 		this.scheduleMidnightRefresh();
 		this.lastAlertAt = null;
+		this.shownAlert = null;
 		this.domReady = false;
 		this.alertCheckInterval = setInterval(() => this.checkAlert(), 60 * 1000);
 	},
@@ -90,6 +91,7 @@ Module.register("MMM-EcoHarmonogram", {
 		const msToMidnight = moment().endOf("day").diff(moment()) + 1000;
 		setTimeout(() => {
 			this.updateDom(this.config.animationSpeed);
+			this.checkAlert();
 			this.scheduleMidnightRefresh();
 		}, msToMidnight);
 	},
@@ -125,29 +127,54 @@ Module.register("MMM-EcoHarmonogram", {
 		});
 	},
 
+	/** Alert bez timera zostaje do północy; "notification" zawsze znika sam, więc dostaje timer. */
+	isPersistentAlert () {
+		return this.config.alertType !== "notification" && !(Number(this.config.alertTimer) > 0);
+	},
+
 	/** Pokazuje alert (moduł "alert" MagicMirror), gdy jutro jest wywóz. */
 	checkAlert () {
 		if (!this.config.showAlert || !this.collections || !this.domReady) return;
 		const now = moment();
-		if (now.hour() < this.config.alertFromHour) return;
-
 		const tomorrow = moment(now).add(1, "day").format("YYYY-MM-DD");
-		const items = this.visibleCollections().filter((c) => c.date === tomorrow);
-		if (!items.length) return;
+		const items = now.hour() < this.config.alertFromHour
+			? []
+			: this.visibleCollections().filter((c) => c.date === tomorrow);
 
-		if (this.lastAlertAt) {
+		if (!items.length) {
+			this.hideAlert();
+			return;
+		}
+		const message = items.map((c) => this.prettyName(c.name)).join(", ");
+
+		if (this.isPersistentAlert()) {
+			// ten sam alert już wisi na ekranie
+			if (this.shownAlert && this.shownAlert.date === tomorrow && this.shownAlert.message === message) return;
+		} else if (this.lastAlertAt) {
 			const sameDay = moment(this.lastAlertAt).isSame(now, "day");
 			const interval = Number(this.config.alertRepeatInterval) || 0;
 			if (sameDay && (interval <= 0 || now.diff(this.lastAlertAt) < interval)) return;
 		}
 		this.lastAlertAt = now.valueOf();
-		this.sendNotification("SHOW_ALERT", {
+		const payload = {
 			type: this.config.alertType,
 			title: this.translate("ALERT_TITLE"),
-			message: items.map((c) => this.prettyName(c.name)).join(", "),
-			imageFA: "recycle",
-			timer: this.config.alertTimer
-		});
+			message,
+			imageFA: "recycle"
+		};
+		if (this.isPersistentAlert()) {
+			this.shownAlert = { date: tomorrow, message };
+		} else {
+			payload.timer = Number(this.config.alertTimer) > 0 ? Number(this.config.alertTimer) : 30 * 1000;
+		}
+		this.sendNotification("SHOW_ALERT", payload);
+	},
+
+	/** Chowa alert pokazany bez timera (np. o północy). */
+	hideAlert () {
+		if (!this.shownAlert) return;
+		this.shownAlert = null;
+		this.sendNotification("HIDE_ALERT");
 	},
 
 	upcomingDays () {
